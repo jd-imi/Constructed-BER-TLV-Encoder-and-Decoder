@@ -149,7 +149,7 @@ void printTLV(Tlv_t * tlv)
 		valueData = (uint8_t *)(tlv->pValue);
 		for(i=0; i<realValLength; i++)
 		{
-			printf("\n\t TLV Value[%d] = 0x%02X", i, valueData[i]);
+			printf("\n\t TLV Value[%ld] = 0x%02X", i, valueData[i]);
 		}
 	}
 }
@@ -191,7 +191,7 @@ void transmitterTLV(Tlv_t * tlv, uint8_t * transmitterBuffer)
 
 	for(i=0; i<(addLengthCounter+SPARE_BUFFER_SIZE); i++)
 	{
-		printf("\n\t transmitterBuffer Value[%d] = 0x%02X", i, transmitterBuffer[i]);
+		printf("\n\t transmitterBuffer Value[%ld] = 0x%02X", i, transmitterBuffer[i]);
 	}
 }
 
@@ -227,7 +227,7 @@ size_t TlvParseAllChildrenTLV(const uint8_t* buffer, size_t length, Tlv_t* tlv)
 		tlv->pChild = NULL;
 		tlv->pNext = NULL;
 
-		if(DEBUG_FLAG)printf("\n TlvParseAllChildrenTLV(), counter = %d, length = %d", counter, length);
+		if(DEBUG_FLAG)printf("\n TlvParseAllChildrenTLV(), counter = %ld, length = %ld", counter, length);
 		//skip 00 byte before the TLV data
 		while(buffer[counter]==0)
 		{
@@ -291,7 +291,7 @@ size_t TlvParseAllChildrenTLV(const uint8_t* buffer, size_t length, Tlv_t* tlv)
 				fistChildIndexInBuffer = counter;
 
 				childCounter = TlvParseAllChildrenTLV(&buffer[fistChildIndexInBuffer], copyLength, (Tlv_t*)tlv->pChild);//recursive calling
-				if(DEBUG_FLAG)printf("\n fistChildIndexInBuffer=%d, childCounter=%d", fistChildIndexInBuffer, childCounter);
+				if(DEBUG_FLAG)printf("\n fistChildIndexInBuffer=%ld, childCounter=%ld", fistChildIndexInBuffer, childCounter);
 			}
 			printf("\n");
 			tlv->pValue = malloc(realValueLength);				
@@ -300,12 +300,12 @@ size_t TlvParseAllChildrenTLV(const uint8_t* buffer, size_t length, Tlv_t* tlv)
 			valueData = (uint8_t *)(tlv->pValue);
 			for(i=0; i<copyLength; i++)
 			{
-				printf("\n\t primitive TLV Value[%d] = 0x%02X", i, valueData[i]);
+				printf("\n\t primitive TLV Value[%ld] = 0x%02X", i, valueData[i]);
 			}
 
 			if(primitiveFlag == false)//constructed TLV
 			{
-				if(DEBUG_FLAG)printf("\n length=%d, counter=%d, realValueLength=%d, childCounter=%d, fistChildIndexInBuffer=%d", length, counter, realValueLength, childCounter, fistChildIndexInBuffer);
+				if(DEBUG_FLAG)printf("\n length=%ld, counter=%ld, realValueLength=%d, childCounter=%ld, fistChildIndexInBuffer=%ld", length, counter, realValueLength, childCounter, fistChildIndexInBuffer);
 				tlv_temp_pointer = (Tlv_t *)(tlv->pChild);
 				//more child TLV data?
 				while(realValueLength>childCounter)
@@ -416,7 +416,7 @@ BOOL TlvParse(const uint8_t* buffer, size_t length, Tlv_t* tlv)
 				valueData = (uint8_t *)(tlv->pValue);
 				for(i=0; i<copyLength; i++)
 				{
-					printf("\n\t primitive TLV Value[%d] = 0x%02X", i, valueData[i]);
+					printf("\n\t primitive TLV Value[%ld] = 0x%02X", i, valueData[i]);
 				}
 			}
 		}
@@ -442,7 +442,7 @@ Tlv_t* TlvSearchTagInTree(uint16_t tag, BOOL recursive,Tlv_t* tlv)
 	if(tlv->nTag == tag) 
 	{
 		returnTLV = tlv;
-		printf("\n Found Tag 0x%x ");
+		printf("\n Found Tag 0x%x ", tag);
 	}
 	else if(recursive == true)
 	{
@@ -494,11 +494,11 @@ BOOL TlvSearchTag(const uint8_t* buffer, size_t length, uint16_t tag, BOOL recur
 	Tlv_t* tlv_p=NULL;
 	size_t decodedCounter = 0;
 	
-	if(DEBUG_FLAG)printf("\n length = %d", length);
+	if(DEBUG_FLAG)printf("\n length = %ld", length);
 	while((decodedCounter<length)&&(returnValue == false))
 	{
 		decodedCounter += TlvParseAllChildrenTLV(buffer, length, &tlv_obj);
-		if(DEBUG_FLAG)printf("\n decodedCounter = %d", decodedCounter);
+		if(DEBUG_FLAG)printf("\n decodedCounter = %ld", decodedCounter);
 		tlv = TlvSearchTagInTree(tag, recursive,&tlv_obj);
 		if(tlv!=NULL)
 		{
@@ -545,8 +545,8 @@ BOOL TlvAdd(Tlv_t* tlv, const Tlv_t* childTlv)
 	// childTlv Tag field
 	if((childTlv->nTag)&TAG_PC_MASK_FIRST_BYTE)
 	{
-		primitiveFlag = false;//this is a contructed TLV object
-		printf("\n This is a contructed child TLV object.");
+		primitiveFlag = false;//this is a constructed TLV object
+		printf("\n This is a constructed child TLV object.");
 	}
 	if(((childTlv->nTag)&TAG_NUMBER_MASK_FIRST_BYTE)==TAG_NUMBER_MASK_FIRST_BYTE )//bits b5 - b1 of the first byte equal '11111'
 	{
@@ -575,9 +575,9 @@ BOOL TlvAdd(Tlv_t* tlv, const Tlv_t* childTlv)
 
 	//update parent TLV Length
 	realValLength = getRealLength(tlv->nLength, &copyLength);	
-	if(DEBUG_FLAG)printf("\n parent realValLength=0x%x, %d", realValLength, realValLength);	
+	if(DEBUG_FLAG)printf("\n parent realValLength=0x%lx, %ld", realValLength, realValLength);	
 	realValLength += addLengthCounter;
-	if(DEBUG_FLAG)printf("\n parent realValLength=0x%x, %d after addLengthCounter", realValLength, realValLength);
+	if(DEBUG_FLAG)printf("\n parent realValLength=0x%lx, %ld after addLengthCounter", realValLength, realValLength);
 	tlv->nLength = encode_Length(realValLength);
 	if(DEBUG_FLAG)printf("\n After encode length, tlv->nLength = 0x%x", tlv->nLength);
 	return true;
