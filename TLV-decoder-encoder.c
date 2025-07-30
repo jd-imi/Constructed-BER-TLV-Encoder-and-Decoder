@@ -137,7 +137,6 @@ uint32_t encode_Length(size_t valueLen)
 void printTLV(Tlv_t * tlv)
 {
 	uint8_t * valueData;
-	uint8_t tempByte=0;
 	size_t realValLength = 0, i=0, copyLength=0;
 
 	printf("\n\n tlv->nTag = 0x%X", tlv->nTag);
@@ -157,7 +156,6 @@ void printTLV(Tlv_t * tlv)
 
 void transmitterTLV(Tlv_t * tlv, uint8_t * transmitterBuffer)
 {
-	uint8_t tempByte=0;
 	uint8_t tempTLBuffer[SPARE_BUFFER_SIZE];
 	size_t realValLength = 0, i=0, copyLength=0, addLengthCounter=0;
 
@@ -491,7 +489,6 @@ BOOL TlvSearchTag(const uint8_t* buffer, size_t length, uint16_t tag, BOOL recur
 {
 	BOOL returnValue = false;
 	Tlv_t tlv_obj;
-	Tlv_t* tlv_p=NULL;
 	size_t decodedCounter = 0;
 	
 	if(DEBUG_FLAG)printf("\n length = %ld", length);
@@ -522,7 +519,6 @@ BOOL TlvSearchTag(const uint8_t* buffer, size_t length, uint16_t tag, BOOL recur
 //   length [IN]: The length of the buffer
 BOOL TlvCreate(Tlv_t* tlv, uint16_t tag, uint8_t* buffer, size_t length)
 {
-	size_t copyLength = 0;
 	tlv->nTag = tag;
 	tlv->nLength = 0;//no Value yet.
 	tlv->pValue = buffer;
@@ -535,8 +531,6 @@ BOOL TlvCreate(Tlv_t* tlv, uint16_t tag, uint8_t* buffer, size_t length)
 BOOL TlvAdd(Tlv_t* tlv, const Tlv_t* childTlv)
 {
 	uint32_t addLengthCounter = 0;
-	BOOL primitiveFlag = true;
-	uint8_t tempByte=0;
 	size_t copyLength=0;
 	size_t realValLength = getRealLength(tlv->nLength, &copyLength);
 
@@ -545,7 +539,6 @@ BOOL TlvAdd(Tlv_t* tlv, const Tlv_t* childTlv)
 	// childTlv Tag field
 	if((childTlv->nTag)&TAG_PC_MASK_FIRST_BYTE)
 	{
-		primitiveFlag = false;//this is a constructed TLV object
 		printf("\n This is a constructed child TLV object.");
 	}
 	if(((childTlv->nTag)&TAG_NUMBER_MASK_FIRST_BYTE)==TAG_NUMBER_MASK_FIRST_BYTE )//bits b5 - b1 of the first byte equal '11111'
@@ -587,8 +580,6 @@ BOOL TlvAdd(Tlv_t* tlv, const Tlv_t* childTlv)
 BOOL TlvAddData(Tlv_t* tlv, uint16_t tag, const uint8_t* value, size_t valueLen)
 {
 	BOOL returnValue = false;
-	uint8_t * valueData = NULL;
-	size_t i=0;
 	if((valueLen!=0)&&(value!=NULL))
 	{
 		tlv->pChild = NULL;
@@ -746,11 +737,14 @@ void put_int16_to_char_array(uint16_t value, uint8_t * valueArray)
 
 int main(int argc, const char * argv[])
 {
+#ifdef DEMO_EXTRA_CODE
 	uint16_t tagSearch = 0x90;//tag to search	
-	Tlv_t tlv_decoder_obj[10], tlv_decoder_obj_single;	
+	Tlv_t tlv_decoder_obj[10];
 	BOOL recursiveFlag=true;
-	size_t index = 0, i=0, decodedCounter=0;
+	size_t index = 0, decodedCounter=0;
 	int tlv_decoder_obj_counter=0;
+#endif /* DEMO_EXTRA_CODE */
+	Tlv_t tlv_decoder_obj_single;
 
 	uint8_t transmitterBuffer[MAX_VALUE_BUFFER_SIZE_IN_BYTE+SPARE_BUFFER_SIZE];
 	uint8_t * tlv_encoder_buffer = transmitterBuffer+SPARE_BUFFER_SIZE;
@@ -779,7 +773,7 @@ int main(int argc, const char * argv[])
 	/*********************************************************/
 	//decoder DEMO with the given example code
 	/*********************************************************/
-	/*
+#ifdef DEMO_EXTRA_CODE
 	tlv_decoder_obj_counter=0;
 	decodedCounter = 0;
 	
@@ -793,11 +787,11 @@ int main(int argc, const char * argv[])
 	{
 		TlvFree(&tlv_decoder_obj[tlv_decoder_obj_counter]);//free up the tlv space taken by malloc
 	}
-	*/
+#endif /* DEMO_EXTRA_CODE */
 	/*********************************************************/
 	//decoder and search DEMO with the given example code
 	/*********************************************************/
-	/*
+#ifdef DEMO_EXTRA_CODE
 	for(index=0; index<2; index++)//two case: recursive and non-recursive search
 	{
 		tagSearch = 0x57;
@@ -812,7 +806,7 @@ int main(int argc, const char * argv[])
 		}
 		recursiveFlag=false;		
 	}	
-	*/
+#endif /* DEMO_EXTRA_CODE */
 	/*********************************************************/
 	//Encoder and Decoder for the test structure DEMO
 	/*********************************************************/
@@ -835,7 +829,7 @@ int main(int argc, const char * argv[])
 
 	//create child TLV
 	//TLV 1
-	strncpy((char *)TxnRef, "demo string", 11);
+	strncpy((char *)TxnRef, "demo string", strlen("demo string")+1);//add 1 for the terminating null
 	tag_encoder = 0xC1;//TAG NUMBER 1
 	TlvAddData(&tlv_encoder_obj1, tag_encoder, TxnRef, sizeof(TxnRef));
 	if(DEBUG_FLAG){printTLV(&tlv_encoder_obj1);}
