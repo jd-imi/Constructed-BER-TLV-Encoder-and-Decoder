@@ -725,41 +725,17 @@ uint8_t tlv4Data[] =
 
 void put_int32_to_char_array(int32_t value, uint8_t * valueArray)
 {
-	int n=0, i=0;
-	uint8_t byteCounter=0, returnValue=0;
-	int32_t tempValue=value;
-	memset(valueArray, '\0', sizeof(valueArray));
-	for(n=0; tempValue!=0; byteCounter++)
+	for(int i = 0; i < 4; ++i)
 	{
-		tempValue = tempValue >> 8;
+		valueArray[i] = (uint8_t)((value >> (8 * i)) & 0xFF);
 	}
-	tempValue=value;
-	while (byteCounter-- > 0)
-	{
-		valueArray[i++]=tempValue&0xFF;
-		tempValue = tempValue >> 8;
-	}
-
-	return;
 }
 
 
 void put_int16_to_char_array(uint16_t value, uint8_t * valueArray)
 {
-	int n=0, i=0;
-	uint8_t byteCounter=0, returnValue=0;
-	int32_t tempValue=value;
-	memset(valueArray, '\0', sizeof(valueArray));
-	for(n=0; tempValue!=0; byteCounter++)
-	{
-		tempValue = tempValue >> 8;
-	}
-	tempValue=value;
-	while (byteCounter-- > 0)
-	{
-		valueArray[i++]=tempValue&0xFF;
-		tempValue = tempValue >> 8;
-	}
+	valueArray[0] = (uint8_t)(value & 0xFF);
+	valueArray[1] = (uint8_t)((value >> 8) & 0xFF);
 
 	return;
 }
