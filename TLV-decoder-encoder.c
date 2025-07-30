@@ -326,7 +326,7 @@ size_t TlvParseAllChildrenTLV(const uint8_t* buffer, size_t length, Tlv_t* tlv)
 // TLV objects at the same level in the buffer, only the first TLV object is parsed.
 // This function should be called before any other TLV function calls.
 // return: true-succeed; false-fail
-BOOL TlvParse(const uint8_t* buffer, size_t length, Tlv_t* tlv)
+BOOL TlvParse(const uint8_t* buffer, Tlv_t* tlv)
 {
 	BOOL returnValue = false;
 	size_t counter = 0;
@@ -404,7 +404,7 @@ BOOL TlvParse(const uint8_t* buffer, size_t length, Tlv_t* tlv)
 			if(primitiveFlag == false)//constructed TLV
 			{
 				tlv->pValue = malloc( sizeof(Tlv_t) );
-				TlvParse(&buffer[counter], copyLength, (Tlv_t*)tlv->pValue);//recursive calling
+				TlvParse(&buffer[counter], (Tlv_t*)tlv->pValue);//recursive calling
 			}
 			else
 			{//primitive TLV
@@ -516,8 +516,7 @@ BOOL TlvSearchTag(const uint8_t* buffer, size_t length, uint16_t tag, BOOL recur
 //              initialized to represent a TLV container with given tag
 //    tag [IN]: The tag of TLV container
 //    buffer [IN]: The buffer to store entire TLV object
-//   length [IN]: The length of the buffer
-BOOL TlvCreate(Tlv_t* tlv, uint16_t tag, uint8_t* buffer, size_t length)
+BOOL TlvCreate(Tlv_t* tlv, uint16_t tag, uint8_t* buffer)
 {
 	tlv->nTag = tag;
 	tlv->nLength = 0;//no Value yet.
@@ -824,7 +823,7 @@ int main(int argc, const char * argv[])
 	//mimic transmitter, the transmitted data is in transmitterBuffer
 	//create parent TLV
 	tag_encoder = 0x70;
-	TlvCreate(&tlv_encoder_parent, tag_encoder, tlv_encoder_buffer, MAX_VALUE_BUFFER_SIZE_IN_BYTE);
+	TlvCreate(&tlv_encoder_parent, tag_encoder, tlv_encoder_buffer);
 	if(DEBUG_FLAG){printTLV(&tlv_encoder_parent);}
 
 	//create child TLV
